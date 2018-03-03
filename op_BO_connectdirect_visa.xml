@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><Policy Version="0">
+<PolicyType>ONLINE</PolicyType>
+<PolicyUpdateVersion>3</PolicyUpdateVersion>
+<UniversalVersion>110</UniversalVersion>
+<Description></Description>
+<KeyRules KeyCombiningAlg="first_applicable">
+<KeyRule>
+<Key>BO_connectdirect_Visa_1_10_2013_256AES</Key>
+<Key>BO_connectdirect_Visa_1_10_2013_256AES</Key>
+</KeyRule>
+</KeyRules>
+<NewKeyRules KeyCombiningAlg="first_applicable">
+</NewKeyRules>
+<SecurityRules PartialMatch="1" NeverDeny="0" PermitCombiningAlg="first_applicable">
+<SecurityRule PartialMatch="1" Effect="audit permit">
+<UserMatch>vontu_users</UserMatch>
+<ActionMatch>all_ops</ActionMatch>
+<ProcessSigned>*</ProcessSigned>
+</SecurityRule>
+<SecurityRule PartialMatch="1" Effect="audit enc permit">
+<ProcessMatch>windows_security_tools</ProcessMatch>
+<ActionMatch>all_ops</ActionMatch>
+<ProcessSigned>*</ProcessSigned>
+</SecurityRule>
+<SecurityRule PartialMatch="1" Effect="audit enc permit">
+<ActionMatch>all_ops</ActionMatch>
+<ProcessSigned>*</ProcessSigned>
+</SecurityRule>
+<SecurityRule PartialMatch="1" Effect="deny audit enc">
+<ActionMatch>all_ops</ActionMatch>
+<ProcessSigned>*</ProcessSigned>
+</SecurityRule>
+</SecurityRules>
+<Target>
+<Users Name="Contact">
+<UserSet Name="vontu_users">
+<User>
+                    <Uname>svc_vontu_dar</Uname>
+                    <OSDomain>TFD1</OSDomain>
+                </User><User>
+                    <Uname>zgiezen_da</Uname>
+                    <OSDomain>TFD1</OSDomain>
+                </User><User>
+                    <Uname>svc_bckup_rstr</Uname>
+                    <OSDomain>TFD1</OSDomain>
+                </User></UserSet>
+</Users>
+<Processes Name="Process">
+<ProcessSet Name="windows_security_tools">
+<Object Type="process">
+                    <Attr Type="location">
+                        <Dir>C:\Program Files\Common Files\McAfee\SystemCore</Dir>
+                        <BaseName>mcshield.exe</BaseName>
+                    </Attr>
+                </Object><Object Type="process">
+                    <Attr Type="location">
+                        <Dir>C:\Program Files (x86)\Bit9\Parity Agent</Dir>
+                        <BaseName>Parity.exe</BaseName>
+                    </Attr>
+                </Object><Object Type="process">
+                    <Attr Type="location">
+                        <Dir>D:\Program Files\Tripwire\TE\Agent\jre\bin</Dir>
+                        <BaseName>java.exe</BaseName>
+                    </Attr>
+                </Object><Object Type="process">
+                    <Attr Type="location">
+                        <Dir>C:\Program Files\Bit9\Parity Agent</Dir>
+                        <BaseName>Parity.exe</BaseName>
+                    </Attr>
+                </Object></ProcessSet>
+</Processes>
+<Libs Name="Library">
+</Libs>
+<ProcessLibs/>
+<Resources Name="Resource">
+</Resources>
+<Actions Name="Action">
+</Actions>
+<Times Name="Time">
+</Times>
+</Target>
+</Policy>
