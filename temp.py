@@ -6,25 +6,6 @@ from xml.dom import minidom
 # if collection.hasAttribute("shelf"):
 #    print "Root element : %s" % collection.getAttribute("shelf")
 
-# # Get all the movies in the collection
-# movies = collection.getElementsByTagName("movie")
-
-# # Print detail of each movie.
-# for movie in movies:
-#    print "*****Movie*****"
-#    if movie.hasAttribute("title"):
-#       print "Title: %s" % movie.getAttribute("title")
-
-#    type = movie.getElementsByTagName('type')[0]
-#    print "Type: %s" % type.childNodes[0].data
-#    format = movie.getElementsByTagName('format')[0]
-#    print "Format: %s" % format.childNodes[0].data
-#    rating = movie.getElementsByTagName('rating')[0]
-#    print "Rating: %s" % rating.childNodes[0].data
-#    description = movie.getElementsByTagName('description')[0]
-#    print "Description: %s" % description.childNodes[0].data
-
-
 # DOMTree = xml.dom.minidom.parse("op_BO_connectdirect_visa.xml")
 # collection = DOMTree.documentElement
 
@@ -59,82 +40,82 @@ for node in securityRules.childNodes:
       root = node.nodeName
    for child in node.childNodes:
       if(child.nodeType == 1):
-          print "Child nodes: " + str(child.childNodes[0].data)
           print "Child names: " + str(child.nodeName)
+          print "Child nodes: " + str(child.childNodes[0].data)
 
 
-groups = []
-usersets = {}
-user = {}
-Users = doc.getElementsByTagName("Users")[0]
-for node in Users.childNodes:
-   for child in node.childNodes:
-      if(child.nodeType == 1):
-         for subchild in child.childNodes:
-            if(subchild.nodeType == 1):
-               user[str(subchild.nodeName)] = str(subchild.childNodes[0].data)
-               print "Child name: " + str(subchild.nodeName)
-               print "Child node: " + str(subchild.childNodes[0].data)
-         groups.append(user)
-   if(node.nodeType == 1):
-      if(node.nodeName == 'UserSet'):
-         usersets[node.getAttribute('Name')] = groups
-
-
-print user
-print groups
-
-import xml.parsers.expat, sys
-
-class MyXML:
-    Parser = ""
-    # Prepare for parsing
-    def __init__(self, xml_filename):
-        assert xml_filename != ""
-        self.xml_filename = xml_filename
-        self.Parser = xml.parsers.expat.ParserCreate(  )
-        self.Parser.CharacterDataHandler = self.handleCharData
-        self.Parser.StartElementHandler = self.handleStartElement
-        self.Parser.EndElementHandler = self.handleEndElement
-    # Parse the XML file
-    def parse(self):
-        try:
-            xml_file = open(self.xml_filename, "r")
-        except:
-            print "ERROR: Can't open XML file %s"%self.xml_filename
-            raise
-        else:
-            try: self.Parser.ParseFile(xml_file)
-            finally: xml_file.close(  )
-    # to be overridden by implementation-specific methods
-    def handleCharData(self, data): pass
-    def handleStartElement(self, name, attrs): pass
-    def handleEndElement(self, name): pass
-
-
-doc = MyXML("op_BO_connectdirect_visa.xml")
-doc.parse()
+def getUserSets(self, doc):
+    groups = []
+    usersets = {}
+    user = {}
+    Users = doc.getElementsByTagName("Users")[0]
+    for node in Users.childNodes:
+        for child in node.childNodes:
+            if(child.nodeType == 1):
+                for subchild in child.childNodes:
+                    if(subchild.nodeType == 1):
+                        user[str(str(subchild.childNodes[0].data))] = str(subchild.nodeName)
+                        print "Child name: " + str(subchild.nodeName)
+                        print "Child node: " + str(subchild.childNodes[0].data)
+        if(node.nodeType == 1):
+            if(node.nodeName == 'UserSet'):
+                groups.append(user)
+                usersets[node.getAttribute('Name')] = groups
 
 
 
 
-list(f(doc))
+# import xml.parsers.expat, sys
 
-xmlFile = minidom.parse( FILE_PATH )
+# class MyXML:
+#     Parser = ""
+#     # Prepare for parsing
+#     def __init__(self, xml_filename):
+#         assert xml_filename != ""
+#         self.xml_filename = xml_filename
+#         self.Parser = xml.parsers.expat.ParserCreate(  )
+#         self.Parser.CharacterDataHandler = self.handleCharData
+#         self.Parser.StartElementHandler = self.handleStartElement
+#         self.Parser.EndElementHandler = self.handleEndElement
+#     # Parse the XML file
+#     def parse(self):
+#         try:
+#             xml_file = open(self.xml_filename, "r")
+#         except:
+#             print "ERROR: Can't open XML file %s"%self.xml_filename
+#             raise
+#         else:
+#             try: self.Parser.ParseFile(xml_file)
+#             finally: xml_file.close(  )
+#     # to be overridden by implementation-specific methods
+#     def handleCharData(self, data): pass
+#     def handleStartElement(self, name, attrs): pass
+#     def handleEndElement(self, name): pass
 
-for script in SCRIPTS:
 
-    newScript = xmlFile.createElement("script")
+# doc = MyXML("op_BO_connectdirect_visa.xml")
+# doc.parse()
 
-    newScript.setAttribute("name"  , script.name)
-    newScript.setAttribute("action", script.action)
 
-    newScriptText = xmlFile.createTextNode( script.description )
 
-    newScript.appendChild( newScriptText  )
-    xmlFile.childNodes[0].appendChild( newScript )
 
-print xmlFile.toprettyxml()
+# list(f(doc))
+
+# xmlFile = minidom.parse( FILE_PATH )
+
+# for script in SCRIPTS:
+
+#     newScript = xmlFile.createElement("script")
+
+#     newScript.setAttribute("name"  , script.name)
+#     newScript.setAttribute("action", script.action)
+
+#     newScriptText = xmlFile.createTextNode( script.description )
+
+#     newScript.appendChild( newScriptText  )
+#     xmlFile.childNodes[0].appendChild( newScript )
+
+# print xmlFile.toprettyxml()
 
 from xml.dom import minidom
 from xml.dom.minidom import Document
@@ -157,6 +138,27 @@ class Policy(object):
         self.policyActions = policyActions
         self.policyEffect = policyEffect
 
+    def getUserSets(self, doc):
+        self.doc = doc
+        groups = []
+        usersets = {}
+        user = {}
+        Users = self.doc.getElementsByTagName("Users")[0]
+        for node in Users.childNodes:
+            for child in node.childNodes:
+                if(child.nodeType == 1):
+                    for subchild in child.childNodes:
+                        if(subchild.nodeType == 1):
+                            user[str(str(subchild.childNodes[0].data))] = str(subchild.nodeName)
+                            print "Child name: " + str(subchild.nodeName)
+                            print "Child node: " + str(subchild.childNodes[0].data)
+            if(node.nodeType == 1):
+                if(node.nodeName == 'UserSet'):
+                    groups.append(user)
+                    usersets[node.getAttribute('Name')] = groups
+        self.usersets = usersets
+        return self.usersets
+
 
 class SecurityRule(object):
     SecurityRuleName = ""
@@ -168,7 +170,11 @@ class SecurityRule(object):
         self.SecurityRuleEffect = SecurityRuleEffect
         self.SecurityRuleActionMatch = SecurityRuleActionMatch
         self.SecurityRuleProcessSigned = SecurityRuleProcessSigned
-    def 
+    def ifUserMatch(self):
+        self.SecurityRuleUserMatch = SecurityRuleUserMatch
+    def ifProcessMatch(self):
+        self.SecurityRuleProcessMatch = SecurityRuleProcessMatch
+
 
 def parse(xml_filename):
    doc = minidom.parse(xml_filename)
@@ -238,7 +244,7 @@ def generate_policy(policy):
     node_3_text = doc.createTextNode(policyUniversalVersion)
     node_3 = doc.createElement('UniversalVersion')
     node_3.appendChild(node_3_text)
-    
+
     node_4_text = doc.createTextNode("")
     node_4 = doc.createElement('Description')
     node_4.appendChild(node_4_text)
@@ -250,22 +256,22 @@ def generate_policy(policy):
 
     node_7_text = doc.createTextNode(currentKey)
     node_7 = doc.createElement('Key')
-    node_7.appendChild(node_7_text) 
+    node_7.appendChild(node_7_text)
 
     node_8_text = doc.createTextNode(policyNewKey)
     node_8 = doc.createElement('NewKeyRules')
-    node_8.appendChild(node_8_text) 
+    node_8.appendChild(node_8_text)
 
     node_9 = doc.createElement('KeyRule')
 
     node_10_text = doc.createTextNode(currentKey)
     node_10 = doc.createElement('Key')
-    node_10.appendChild(node_10_text) 
+    node_10.appendChild(node_10_text)
 
     node_11 = doc.createElement('SecurityRules')
     node_11.setAttribute('PermitCombiningAlg','first_applicable')
 # We set "NeverDeny" to '1' so it defaults to Learning Mode. The current policies
-# don't restrict access anyway, so we aren't losing anything by learning exactly 
+# don't restrict access anyway, so we aren't losing anything by learning exactly
 # what actions are occuring.
     node_11.setAttribute('NeverDeny','1')
     node_11.setAttribute('PartialMatch','1')
