@@ -266,7 +266,38 @@ class Policy(object):
                         self.processSets[str(node.getAttribute('Name'))] = groups
         return self.processSets
 
-
+    def createProcessSets(self, ProcessSetDict):
+        # returns the resultant xml node of a provided UserSet dictionary
+        #self.UserSetDict = UserSetDict
+        keys = ProcessSetDict.keys()
+        doc = Document()
+        self.root = doc.createElement("Processes")
+        self.root.setAttribute("Name", "Process")
+        for key in keys:
+            values = ProcessSetDict[key][0]
+            subroot = doc.createElement("ProcessSet")
+            subroot.setAttribute("Name", key)
+            for val in values:
+                # set up process node structure------------
+                objNode = doc.createElement("Object")
+                objNode.setAttribute("Type", "process")
+                attrNode = doc.createElement("Attr")
+                attrNode.setAttribute("Type", "location")
+                #------------------------------------------
+                dirnode = doc.createElement("Dir")
+                basenode = doc.createElement("BaseName")
+                dir_text = doc.createTextNode(val)
+                base_text = doc.createTextNode(values[val])
+                # input process values (dir and basename)
+                dirnode.appendChild(dir_text)
+                basenode.appendChild(base_text)
+                #------------------------------------------
+                attrNode.appendChild(dirnode)
+                attrNode.appendChild(basenode)
+                objNode.appendChild(attrNode)
+                subroot.appendChild(objNode)
+        self.root.appendChild(subroot)
+        return self.root
 
 
 class SecurityRule(object):
