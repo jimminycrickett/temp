@@ -43,17 +43,20 @@ for node in securityRules.childNodes:
           print "Child names: " + str(child.nodeName)
           print "Child nodes: " + str(child.childNodes[0].data)
 
-def createUserSets(UserSetDict):
+def createSecurityRuleSets(SecurityRuleSetDict):
     # returns the resultant xml node of a provided UserSet dictionary
-    #self.UserSetDict = UserSetDict
-    keys = UserSetDict.keys()
+    #self.SecurityRuleSetDict = SecurityRuleSetDict
+    keys = SecurityRuleSetDict.keys()
     doc = Document()
-    root = doc.createElement("Users")
-    root.setAttribute("Name", "Contact")
+    root = doc.createElement("SecurityRules")
+    root.setAttribute("PartialMatch", 1)
+    root.setAttribute("NeverDeny", 1)
+    root.setAttribute("PermitCombiningAlg", "first_applicable")
     for key in keys:
-        values = UserSetDict[key][0]
-        subroot = doc.createElement("UserSet")
-        subroot.setAttribute("Name", key)
+        values = SecurityRuleSetDict[key][0]
+        subroot = doc.createElement("SecurityRule")
+        subroot.setAttribute("PartialMatch", 1)
+        subroot.setAttribute("Effect", )
         for val in values:
             usernode = doc.createElement("User")
             user = doc.createElement("Uname")
@@ -315,30 +318,25 @@ class SecurityRule(object):
 
 #-----------Classes--------------------------------------------------------
 
-def parse(xml_filename):
-   doc = minidom.parse(xml_filename)
-   return doc
-
-def make_policy_object(policyName, policyVersion, policyKey, policyUpdateVersion, policyNewKey, policyActions):
-    policy = Policy()
-    policy.policyName = policyName
-    policy.policyVersion = policyVersion
-    policy.policyUpdateVersion = policyUpdateVersion
-    policy.policyUniversalVersion = 110
-    policy.policyKey = policyKey
-    policy.policyNewKey = policyNewKey
-    policy.policySecurityRules = policySecurityRules
-    policy.policyLibs = policyLibs
-    policy.policyResources = policyResources
-    policy.policyActions = policyActions
-    policy.policyTimes = policyTimes
-    policy.policyEffect = policyEffect
-    return policy
-
+from os.path import basename
+from sys import platform
+from xml.dom.minidom import parse, Document
 
 def get_policy(xml):
-
-
+    doc = parse(xml)
+    policy = Policy()
+    if(platform == "linux" or platform == "linux2"):
+        policy.PolicyName = os.path.realpath(xml).split("/")[-1].split(".")[0]
+    elif(platform == "win32" or platform == "cygwin"):
+        policy.PolicyName = os.path.realpath(xml).split("\\")[-1].split(".")[0]
+    policy.policyVersion = getPolicyVersion(doc)
+    policy.policyType = getpolicyType(doc)
+    policy.policyKey = getPolicyKey(doc)
+    policy.policyUpdateVersion = getPolicyUpdateVersion(doc)
+    policy.policyUserSets = getUserSets(doc)
+    policy.policyProcesses = getProcesses(doc)
+    polciy.policySecurityRules = getSecurityRules(doc)
+    return policy
 
 def generate_policy(policy):
 
