@@ -43,65 +43,64 @@ for node in securityRules.childNodes:
           print "Child names: " + str(child.nodeName)
           print "Child nodes: " + str(child.childNodes[0].data)
 
+def createUserSets(UserSetDict):
+    # returns the resultant xml node of a provided UserSet dictionary
+    #self.UserSetDict = UserSetDict
+    keys = UserSetDict.keys()
+    doc = Document()
+    root = doc.createElement("Users")
+    root.setAttribute("Name", "Contact")
+    for key in keys:
+        values = UserSetDict[key][0]
+        subroot = doc.createElement("UserSet")
+        subroot.setAttribute("Name", key)
+        for val in values:
+            usernode = doc.createElement("User")
+            user = doc.createElement("Uname")
+            user_text = doc.createTextNode(val)
+            user.appendChild(user_text)
+            domain_node = doc.createElement("OSDomain")
+            domain_text = doc.createTextNode(values[val])
+            domain_node.appendChild(domain_text)
+            usernode.appendChild(user)
+            usernode.appendChild(domain_node)
+            subroot.appendChild(usernode)
+    root.appendChild(subroot)
+    return root
 
-def getUserSets(self, doc):
-    groups = []
-    usersets = {}
-    user = {}
-    Users = doc.getElementsByTagName("Users")[0]
-    for node in Users.childNodes:
-        for child in node.childNodes:
-            if(child.nodeType == 1):
-                for subchild in child.childNodes:
-                    if(subchild.nodeType == 1):
-                        user[str(str(subchild.childNodes[0].data))] = str(subchild.nodeName)
-                        print "Child name: " + str(subchild.nodeName)
-                        print "Child node: " + str(subchild.childNodes[0].data)
-        if(node.nodeType == 1):
-            if(node.nodeName == 'UserSet'):
-                groups.append(user)
-                usersets[node.getAttribute('Name')] = groups
+def createProcessSets(ProcessSetDict):
+    # returns the resultant xml node of a provided UserSet dictionary
+    #self.UserSetDict = UserSetDict
+    keys = ProcessSetDict.keys()
+    doc = Document()
+    root = doc.createElement("Processes")
+    root.setAttribute("Name", "Process")
+    for key in keys:
+        values = ProcessSetDict[key][0]
+        subroot = doc.createElement("ProcessSet")
+        subroot.setAttribute("Name", key)
+        for val in values:
+            # set up process node structure------------
+            objNode = doc.createElement("Object")
+            objNode.setAttribute("Type", "process")
+            attrNode = doc.createElement("Attr")
+            attrNode.setAttribute("Type", "location")
+            #------------------------------------------
+            dirnode = doc.createElement("Dir")
+            basenode = doc.createElement("BaseName")
+            dir_text = doc.createTextNode(val)
+            base_text = doc.createTextNode(values[val])
+            # input process values (dir and basename)
+            dirnode.appendChild(dir_text)
+            basenode.appendChild(base_text)
+            #------------------------------------------
+            attrNode.appendChild(dirnode)
+            attrNode.appendChild(basenode)
+            objNode.appendChild(attrNode)
+            subroot.appendChild(objNode)
+    root.appendChild(subroot)
+    return root
 
-
-
-
-# import xml.parsers.expat, sys
-
-# class MyXML:
-#     Parser = ""
-#     # Prepare for parsing
-#     def __init__(self, xml_filename):
-#         assert xml_filename != ""
-#         self.xml_filename = xml_filename
-#         self.Parser = xml.parsers.expat.ParserCreate(  )
-#         self.Parser.CharacterDataHandler = self.handleCharData
-#         self.Parser.StartElementHandler = self.handleStartElement
-#         self.Parser.EndElementHandler = self.handleEndElement
-#     # Parse the XML file
-#     def parse(self):
-#         try:
-#             xml_file = open(self.xml_filename, "r")
-#         except:
-#             print "ERROR: Can't open XML file %s"%self.xml_filename
-#             raise
-#         else:
-#             try: self.Parser.ParseFile(xml_file)
-#             finally: xml_file.close(  )
-#     # to be overridden by implementation-specific methods
-#     def handleCharData(self, data): pass
-#     def handleStartElement(self, name, attrs): pass
-#     def handleEndElement(self, name): pass
-
-
-# doc = MyXML("op_BO_connectdirect_visa.xml")
-# doc.parse()
-
-
-
-
-# list(f(doc))
-
-# xmlFile = minidom.parse( FILE_PATH )
 
 # for script in SCRIPTS:
 
@@ -120,53 +119,161 @@ def getUserSets(self, doc):
 from xml.dom import minidom
 from xml.dom.minidom import Document
 
-class Policy(object):
-    policyName = ""
-    policyVersion = 0
-    policyUpdateVersion = ""
-    policyUniversalVersion = 110
-    policyKey = ""
-    policyNewKey = ""
-    policySecurityRules = {}
-    def __init__(self):
-        self.policyName = policyName
-        self.policyVersion = policyVersion
-        self.policyUpdateVersion = policyUpdateVersion
-        self.policyUniversalVersion = 110
-        self.policyKey = policyKey
-        self.policyNewKey = policyNewKey
-        self.policyActions = policyActions
-        self.policyEffect = policyEffect
+#-----------Classes--------------------------------------------------------
+class User(object):
+    UserName = "baduser"
+    UserDomain = "TFD1"
+    def __init__(self,UserName, UserDomain):
+        self.UserName = UserName
+        self.UserDomain = UserDomain
 
-    def getUserSets(self, doc):
-        self.doc = doc
+class Process(object):
+    ProcessName = "badprocess"
+    ProcessDirectory = "baddirectory"
+    def __init__(self,ProcessName, ProcessDirectory):
+        self.ProcessName = ProcessName
+        self.ProcessDirectory = ProcessDirectory
+
+
+class Policy(object):
+    policyName = "Place Holder Policy Name"
+    policyVersion = 0
+    policyUpdateVersion = 0
+    policyUniversalVersion = 110
+    policyType = "LDT"
+    # We're going to be creating LDT policies, so it's a good default.
+    policyKey = "Place Holder Current Key Name"
+    policyNewKey = "Place Holder New Key Name"
+    policySecurityRules = {}
+    def __init__(self,policyName):
+        self.policyName = policyName
+
+    def getPolicyVersion(self, doc):
+        policyInfo = doc.getElementsByTagName("Policy")[0]
+        self.policyVersion = policyInfo.getAttribute("Version")
+        return self.policyVersion
+
+    def getCurrentKeys(self, doc):
+        self.currentKeys = doc.getElementsByTagName("KeyRules")[0].childNodes[0].childNodes[0].data
+        return self.currentKeys
+
+    def getNewKeys(self, doc):
+        self.newKeys = doc.getElementsByTagName("NewKeyRules")[0].childNodes[0].childNodes[0].data
+        return self.newKeys
+
+    def getPolicyUpdateVersion(self, doc):
+        self.policyUpdateVersion = doc.getElementsByTagName("PolicyUpdateVersion")[0].childNodes[0].data
+        return self.policyUpdateVersion
+
+    def getUniversalVersion(self, doc):
+        self.UniversalVersion = doc.getElementsByTagName("UniversalVersion")[0].childNodes[0].data
+        return self.UniversalVersion
+
+    def getpolicyType(self, doc):
+        self.policyType = doc.getElementsByTagName("PolicyType")[0].childNodes[0].data
+        return self.policyType
+
+    def getUserSets(self,doc):
+        # initialize default domain name and username, check for them on exit
+        domain = 'TFD1'
+        username= 'baduser'
         groups = []
-        usersets = {}
-        user = {}
-        Users = self.doc.getElementsByTagName("Users")[0]
-        for node in Users.childNodes:
+        self.usersets = {}
+        user_dict = {}
+        User_list = doc.getElementsByTagName("Users")[0]
+        for node in User_list.childNodes:
             for child in node.childNodes:
                 if(child.nodeType == 1):
                     for subchild in child.childNodes:
                         if(subchild.nodeType == 1):
-                            user[str(str(subchild.childNodes[0].data))] = str(subchild.nodeName)
-                            print "Child name: " + str(subchild.nodeName)
-                            print "Child node: " + str(subchild.childNodes[0].data)
+                            user = User(username,domain)
+                            if(subchild.nodeName == "Uname"):
+                                username = str(subchild.childNodes[0].data)
+                                user.UserName = username
+                            elif(subchild.nodeName == "OSDomain"):
+                                domain = str(subchild.childNodes[0].data)
+                                user.Domain = domain
+#                            print "Child name: " + user.UserName
+#                            print "Child node: " + user.UserDomain
+                            if(user.UserName != 'baduser'):
+                                user_dict[user.UserName] = user.UserDomain
+                            else: continue
             if(node.nodeType == 1):
                 if(node.nodeName == 'UserSet'):
-                    groups.append(user)
-                    usersets[node.getAttribute('Name')] = groups
-        self.usersets = usersets
+                    groups.append(user_dict)
+                    self.usersets[str(node.getAttribute('Name'))] = groups
         return self.usersets
 
 
+    def createUserSets(self,UserSetDict):
+        # returns the resultant xml node of a provided UserSet dictionary
+        self.UserSetDict = UserSetDict
+        keys = self.UserSetDict.keys()
+        doc = Document()
+        root = doc.createElement("Users")
+        root.setAttribute("Name", "Contact")
+        for key in keys:
+            values = UserSetDict[key][0]
+            subroot = doc.createElement("UserSet")
+            subroot.setAttribute("Name", key)
+            for val in values:
+                usernode = doc.createElement("User")
+                user = doc.createElement("Uname")
+                user_text = doc.createTextNode(val)
+                user.appendChild(user_text)
+                domain_node = doc.createElement("OSDomain")
+                domain_text = doc.createTextNode(values[val])
+                domain_node.appendChild(domain_text)
+                usernode.appendChild(user)
+                usernode.appendChild(domain_node)
+                subroot.appendChild(usernode)
+        root.appendChild(subroot)
+        self.user_root = root
+        return self.user_root
+
+    def getProcessSets(self,doc):
+        # initialize default directory name and process name, check for them on exit
+        processname= 'mimikatz.exe'
+        directory = '\\somestrangehost\somedirectory'
+        groups = []
+        self.processSets = {}
+        process_dict = {}
+        process_list = doc.getElementsByTagName("Processes")[0]
+        for node in process_list.childNodes:
+            # ProcessSet
+            if(node.nodeType == 1):
+                for child in node.childNodes:
+                    # Object
+                    if(child.nodeType == 1):
+                        for subchild in child.childNodes:
+                            # Attr
+                            if(subchild.nodeType == 1):
+                                for underchild in subchild.childNodes:
+                                    # pay dirt...
+                                    process = Process(processname,directory)
+                                    if(underchild.nodeName == "Dir"):
+                                        directory = str(underchild.childNodes[0].data)
+                                        process.ProcessDirectory = directory
+                                    elif(underchild.nodeName == "BaseName"):
+                                        processname = str(underchild.childNodes[0].data)
+                                        process.ProcessName = processname
+                                    if(process.ProcessName != 'mimikatz.exe'):
+                                        process_dict[process.ProcessDirectory] = process.ProcessName
+                                    else: continue
+                if(node.nodeType == 1):
+                    if(node.nodeName == 'ProcessSet'):
+                        groups.append(process_dict)
+                        self.processSets[str(node.getAttribute('Name'))] = groups
+        return self.processSets
+
+
+
+
 class SecurityRule(object):
-    SecurityRuleName = ""
-    SecurityRuleEffect = ""
-    SecurityRuleActionMatch = ""
+    SecurityRuleEffect = "audit enc permit" # here, have some sensible defaults...
+    SecurityRuleActionMatch = "all_ops" # here, have some crappy defaults...
     SecurityRuleProcessSigned = "*"
     def __init__(self):
-        self.SecurityRuleName = SecurityRuleName
         self.SecurityRuleEffect = SecurityRuleEffect
         self.SecurityRuleActionMatch = SecurityRuleActionMatch
         self.SecurityRuleProcessSigned = SecurityRuleProcessSigned
@@ -175,6 +282,7 @@ class SecurityRule(object):
     def ifProcessMatch(self):
         self.SecurityRuleProcessMatch = SecurityRuleProcessMatch
 
+#-----------Classes--------------------------------------------------------
 
 def parse(xml_filename):
    doc = minidom.parse(xml_filename)
@@ -198,18 +306,7 @@ def make_policy_object(policyName, policyVersion, policyKey, policyUpdateVersion
 
 
 def get_policy(xml):
-    doc = parse(xml)
 
-    securityRules = doc.getElementsByTagName("SecurityRules")[0]
-    userSets = doc.getElementsByTagName("UserSet")[0]
-    currentKeys = doc.getElementsByTagName("KeyRules")[0].childNodes[0].childNodes[0].data
-    newKeys = doc.getElementsByTagName("NewKeyRules")[0].childNodes[0].childNodes[0].data
-    policyInfo = doc.getElementsByTagName("Policy")[0]
-    policyVersion = policyInfo.getAttribute("Version")
-    policyUpdateVersion = doc.getElementsByTagName("PolicyUpdateVersion")[0].childNodes[0].data
-    universalVersion = doc.getElementsByTagName("UniversalVersion")[0].childNodes[0].data
-    policyType = doc.getElementsByTagName("PolicyType")[0].childNodes[0].data
-    return policy
 
 
 def generate_policy(policy):
