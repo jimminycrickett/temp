@@ -18,30 +18,60 @@ for i in doc.getElementsByTagName("SecurityRules")[0].childNodes:
          for n in i.childNodes:
             if(n.nodeType == 1):
 
+class Rule(object):
+    RuleActionMatch = "all_ops"
+    RuleProcessSigned = "*"
+    def __init__(self, RuleActionMatch, RuleProcessSigned):
+        self.RuleActionMatch = RuleActionMatch
+        self.RuleProcessSigned = RuleProcessSigned
 
-
-
-from xml.dom import minidom
-
-def f(elem, level=-1):
-    if elem.nodeType == elem.ELEMENT_NODE:
-        for child in elem.childNodes:
-            for e, l in f(child, level + 1):
-                yield e, l
+def getSecurityRuleSets(doc):
+    # initialize default domain name and username, check for them on exit
+    RuleActionMatch = "all_ops"
+    RuleProcessSigned = "*"
+    rules = []
+    rules_sets = {}
+    rules_tuple = ()
+    SecurityRules_list = doc.getElementsByTagName("SecurityRules")[0]
+    for node in SecurityRules_list.childNodes:
+        if(node.nodeType == 1):
+            actions = []
+            actions.append(str(node.getAttribute("PartialMatch")))
+            actions.append(str(node.getAttribute("Effect")))
+        for child in node.childNodes:
+            if(child.nodeType == 1):
+                rule = None # zero-out the rule object in case there's no preexisting usermatch or processmatch...
+                group = []
+                rule = Rule(RuleActionMatch,RuleProcessSigned)
+                if(child.nodeName == "UserMatch"):
+                    rule.UserMatch = str(child.childNodes[0].data)
+                elif(child.nodeName == "ProcessMatch"):
+                    rule.ProcessMatch == str(child.childNodes[0].data)
+                if(child.nodeName == "ActionMatch"):
+                    actionMatch = str(child.childNodes[0].data)
+                    rule.RuleActionMatch = actionMatch
+                elif(child.nodeName == "ProcessSigned"):
+                    RuleProcessSigned = str(child.childNodes[0].data)
+                    rule.RuleProcessSigned = RuleProcessSigned
+                if(hasattr(rule.UserMatch)):
+                    group.append(rule.UserMatch)
+                elif(hasattr(rule.ProcessMatch)):
+                    group.append(rule.ProcessMatch
+                else:
+                    group.append("None")
+                group.append(rule.RuleActionMatch)
+                group.append(rule.RuleProcessSigned)
+                rules_tuple = (group, actions)
+            else: continue
+        rules.append(rules_tuple)
+        rules_sets[str(node.getAttribute('Name'))] = rules
+    return rules_sets
 
 
 def handleCharData(data): pass
 def handleStartElement(self, name, attrs): pass
 def handleEndElement(self, name): pass
 
-securityRules = doc.getElementsByTagName("SecurityRules")[0]
-for node in securityRules.childNodes:
-   if(node.nodeType == 1):
-      root = node.nodeName
-   for child in node.childNodes:
-      if(child.nodeType == 1):
-          print "Child names: " + str(child.nodeName)
-          print "Child nodes: " + str(child.childNodes[0].data)
 
 def createSecurityRuleSets(SecurityRuleSetDict):
     # returns the resultant xml node of a provided UserSet dictionary
@@ -58,15 +88,17 @@ def createSecurityRuleSets(SecurityRuleSetDict):
         subroot.setAttribute("PartialMatch", 1)
         subroot.setAttribute("Effect", )
         for val in values:
-            usernode = doc.createElement("User")
-            user = doc.createElement("Uname")
-            user_text = doc.createTextNode(val)
-            user.appendChild(user_text)
-            domain_node = doc.createElement("OSDomain")
-            domain_text = doc.createTextNode(values[val])
-            domain_node.appendChild(domain_text)
-            usernode.appendChild(user)
-            usernode.appendChild(domain_node)
+            if(values[val] == "UserMatch"):
+                userMatchNode = doc.createElement("UserMatch")
+                userMatchNode_text = doc.createTextNode(val)
+                userMatchNode.appendChild(userMatchNode_text)
+                subroot.appendChild(userMatchNode)
+            elif(values[val] == "ProcessMatch"):
+                processMatchNode = doc.createElement("ProcessMatch")
+                processMatchNode_text = doc.createTextNode(val)
+            actionMatchNode = doc.createElement("ActionMatch") 
+            processSigned = doc.createElement("ProcessSigned")
+            processSigned_text = doc.createTextNode(val)
             subroot.appendChild(usernode)
     root.appendChild(subroot)
     return root
